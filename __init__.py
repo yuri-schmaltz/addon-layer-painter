@@ -22,11 +22,11 @@ bl_info = {
     "author": "Joshua Knauber, blanchsb, Cyan Los, Bongo Cat, thefauxrogue, Hunanbean-Collective, E. Woodford, R. Brown, S. Charan, A. Eldien",
     "description": "Layer based texture painting inside blender",
     "blender": (4, 0, 0),
-    "version": (2, 1, 0),
+    "version": (3, 0, 0),
     "location": "View3D > N-Panel > Layer Painter",
     "category": "Material",
-    "wiki_url": "https://github.com/joshuaKnauber/layer_painter",
-    "tracker_url": "https://github.com/joshuaKnauber/layer_painter/issues",
+    "wiki_url": "https://github.com/yuri-schmaltz/addon-layer-painter",
+    "tracker_url": "https://github.com/yuri-schmaltz/addon-layer-painter/issues",
 }
 
 
