@@ -4,6 +4,7 @@ from ..operators import utils_operator
 from .. import utils
 from ..data import utils_nodes
 from ..data.materials.layers.layer_types import layer_fill
+from . import utils_dialogs
 
 
 class LP_OT_AddFillLayer(bpy.types.Operator):
@@ -80,6 +81,7 @@ class LP_OT_RemoveLayer(bpy.types.Operator):
                                     options={"HIDDEN", "SKIP_SAVE"})
     
     overwrite_uid: bpy.props.StringProperty(options={"HIDDEN", "SKIP_SAVE"})
+    confirmed: bpy.props.BoolProperty(default=False, options={"HIDDEN", "SKIP_SAVE"})
 
     @classmethod
     def poll(cls, context):
@@ -92,6 +94,14 @@ class LP_OT_RemoveLayer(bpy.types.Operator):
             self.report({'ERROR'}, f"Material '{self.material}' not found.")
             return {"CANCELLED"}
         
+        # Show confirmation dialog if not yet confirmed
+        if not self.confirmed:
+            if self.overwrite_uid:
+                mat.lp.selected_index = mat.lp.layer_uid_index(self.overwrite_uid)
+            
+            # Invoke confirmation dialog
+            return context.window_manager.invoke_props_dialog(self, width=300)
+        
         try:
             if self.overwrite_uid:
                 mat.lp.selected_index = mat.lp.layer_uid_index(self.overwrite_uid)
@@ -100,6 +110,20 @@ class LP_OT_RemoveLayer(bpy.types.Operator):
             utils.redraw()
             return {"FINISHED"}
         except Exception as e:
+            self.report({'ERROR'}, f"Failed to remove layer: {str(e)}")
+            return {"CANCELLED"}
+    
+    def draw(self, context):
+        """Draw confirmation dialog."""
+        layout = self.layout
+        mat = bpy.data.materials.get(self.material)
+        
+        if mat and mat.lp.selected:
+            layer_name = mat.lp.selected.name
+            layout.label(text=f'Delete layer "{layer_name}"?', icon="ERROR")
+            layout.label(text="This action cannot be undone.", icon="BLANK1")
+        
+        layout.separator()
             self.report({'ERROR'}, f"Failed to remove layer: {str(e)}")
             return {"CANCELLED"}
 

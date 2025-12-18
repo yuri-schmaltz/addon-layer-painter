@@ -4,6 +4,7 @@ import os
 
 from .import utils_paint
 from .. import utils, constants
+from . import utils_progress
 
 
 IS_BAKING = False
@@ -159,7 +160,6 @@ class LP_OT_BakeChannelsModal(bpy.types.Operator):
     bl_label = "Bake Modal"
     bl_description= "Bakes the selected channels for the selected objects"
 
-
     def modal(self, context, event):
         global IS_BAKING
         if not IS_BAKING:
@@ -177,8 +177,21 @@ class LP_OT_BakeChannelsModal(bpy.types.Operator):
             completed = sum(1 for channel in mat.lp.channels if channel.completed_bake)
             if completed != self.baked_channels:
                 self.baked_channels = completed
+                progress_percent = (self.baked_channels / self.total_channels) * 100
+                
+                # Update Blender progress bar
                 context.window_manager.progress_update(self.baked_channels)
-                self.report({'INFO'}, f"Baking... {self.baked_channels}/{self.total_channels} channels")
+                
+                # Update progress tracker for UI feedback
+                utils_progress.update_progress(
+                    name="Baking Channels",
+                    current=self.baked_channels,
+                    total=self.total_channels
+                )
+                
+                # Report to user
+                self.report({'INFO'}, 
+                    f"Baking... {self.baked_channels}/{self.total_channels} channels ({progress_percent:.0f}%)")
         
         return {'PASS_THROUGH'}
 
@@ -203,11 +216,21 @@ class LP_OT_BakeChannelsModal(bpy.types.Operator):
         macro = get_macro()
 
         # count total channels to bake for progress tracking
-        self.total_channels = sum(1 for channel in utils.active_material(context).lp.channels if channel.bake)
+        mat = utils.active_material(context)
+        self.total_channels = sum(1 for channel in mat.lp.channels if channel.bake)
         self.baked_channels = 0
 
+        # Initialize progress tracker
+        self.progress = utils_progress.ProgressTracker(
+            name="Baking Channels",
+            total_steps=self.total_channels,
+            callback=lambda name, current, total, percent: 
+                self.report({'INFO'}, f"{name}: {current}/{total} ({percent:.0f}%)")
+        )
+        self.progress.start()
+
         # set up all bake channels
-        for channel in utils.active_material(context).lp.channels:
+        for channel in mat.lp.channels:
             channel.completed_bake = False
             if channel.bake:
 
