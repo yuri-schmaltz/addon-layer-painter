@@ -4,9 +4,10 @@ import bpy
 class LP_BakeProperties(bpy.types.PropertyGroup):
 
     resolution: bpy.props.IntProperty(name="Resolution",
-                                    description="Resolution of the baked images",
+                                    description="Resolution of the baked images (max 16384 to prevent OOM)",
                                     default=2048,
-                                    min=2)
+                                    min=2,
+                                    max=16384)
 
     base_color: bpy.props.FloatVectorProperty(name="Base Color",
                                     description="Background color to fill the baked images with",

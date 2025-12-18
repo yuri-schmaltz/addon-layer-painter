@@ -9,6 +9,8 @@ The discord server is used as the main place to share information and work regar
 
 ## Overview
 - [Addon](#addon)
+- [Development](#development)
+- [Architecture](#architecture)
 - [Additional Assets](#additional-assets)
 - [Tutorials](#tutorials)
 - [Contributors](#contributors)
@@ -16,6 +18,67 @@ The discord server is used as the main place to share information and work regar
 
 ## Addon
 WIP (This section will contain a written description on how to use the addon)
+
+## Development
+
+### Setup
+1. Clone the repository into your Blender addons folder: `~/.config/blender/X.Y/scripts/addons/`
+2. Enable the addon in Blender preferences (Edit > Preferences > Add-ons > Layer Painter)
+3. Open Blender console (Window > Toggle System Console) to see debug messages
+
+### Code Style
+- Follow PEP 8 conventions
+- Use descriptive variable/function names
+- Add docstrings to all functions and classes
+- Include type hints where applicable (Python 3.9+)
+
+### Testing
+Before submitting PRs, test:
+- Create/remove/move layers and verify no crashes
+- Undo/redo operations (Ctrl+Z / Ctrl+Shift+Z)
+- Paint textures and verify image creation
+- Bake channels and verify progress feedback
+
+## Architecture
+
+### Module Structure
+```
+layer-painter/
+├── ui/              # UI panels and layout (VIEW_3D, NODE_EDITOR)
+├── operators/       # User-triggered operations (commands)
+├── data/            # Core business logic (layers, channels, materials)
+├── assets/          # Asset management (masks, filters)
+├── addon/           # Addon configuration and preferences
+├── handlers.py      # Blender event handlers (load, save, undo, redo)
+├── constants.py     # Global constants (node types, socket types, names)
+└── utils.py         # Utility functions (UID generation, redraw, active material)
+```
+
+### Key Concepts
+
+**Layer**: A compositing layer containing one or more channels. Types: FILL (procedural) or PAINT (texture-based).
+
+**Channel**: A material output (e.g., Base Color, Normal, Roughness). Stores default value and data type (COLOR or TEXTURE).
+
+**Mask**: A procedural node group that modulates layer/channel output. Stacked like Photoshop layer masks.
+
+**Filter**: A procedural node group applied to layer output. Different from masks in application point.
+
+**UID**: Unique identifier (10-char hex) for layers, channels, and materials. Used for persistent references.
+
+### Data Flow
+1. User creates Material > Layer > Channel
+2. Layer initializes node group in material shader editor
+3. Channel adds input/output sockets and nodes to layer group
+4. Layer creates nodes based on channel data type (COLOR/TEXTURE)
+5. Masks/Filters are chained as node groups
+6. Layer opacity and channel opacity modulate final output
+
+### Caching Strategy
+- `channel.cached_materials` / `channel.cached_inputs`: Cache material/input references by UID
+- `layer.cached_materials` / `layer.cached_nodes`: Cache material/node references by UID
+- **Invalidation**: Cleared on file load, undo/redo, depsgraph update
+- **Rationale**: Blender object references can become invalid; UIDs provide persistent lookup
 
 ## Additional Assets
 - [Texture Based Grunge Maps by BongoCat - Already Included](https://drive.google.com/file/d/11sJSfT7jJohLHouMSQB5oc4GzUHtOifO/view)

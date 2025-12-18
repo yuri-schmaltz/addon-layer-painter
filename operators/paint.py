@@ -20,8 +20,9 @@ class LP_OT_PaintChannel(bpy.types.Operator):
     resolution: bpy.props.IntProperty(options={"HIDDEN"},
                                         default=2048,
                                         min=2,
+                                        max=16384,
                                         name="Resolution",
-                                        description="Resolution of the created image")
+                                        description="Resolution of the created image (max 16384 to prevent OOM)")
     color: bpy.props.FloatVectorProperty(options={"HIDDEN"},
                                         default=(1,1,1,0),
                                         size=4,

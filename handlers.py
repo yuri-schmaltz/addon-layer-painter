@@ -42,14 +42,25 @@ def on_exit_handler():
     pass
 
 
+@persistent
+def on_undo_redo_handler(dummy):
+    """clears caches after undo/redo operations to prevent inconsistent state"""
+    channel.clear_caches()
+    layer.clear_caches()
+
+
 def register():
     bpy.app.handlers.load_post.append(on_load_handler)
     bpy.app.handlers.save_pre.append(pre_save_handler)
     bpy.app.handlers.depsgraph_update_post.append(depsgraph_handler)
+    bpy.app.handlers.undo_post.append(on_undo_redo_handler)
+    bpy.app.handlers.redo_post.append(on_undo_redo_handler)
     atexit.register(on_exit_handler)
 
 
 def unregister():
+    bpy.app.handlers.undo_post.remove(on_undo_redo_handler)
+    bpy.app.handlers.redo_post.remove(on_undo_redo_handler)
     bpy.app.handlers.depsgraph_update_post.remove(depsgraph_handler)
     bpy.app.handlers.load_post.remove(on_load_handler)
     bpy.app.handlers.save_pre.remove(pre_save_handler)
