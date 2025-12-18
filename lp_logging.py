@@ -9,7 +9,7 @@ Comprehensive logging infrastructure for Layer Painter with:
 - Configurable log levels
 
 Usage:
-    from layer_painter.logging import get_logger
+    from layer_painter.lp_logging import get_logger
     
     logger = get_logger("module_name")
     logger.debug("Debug message")

@@ -18,7 +18,7 @@ Key Integration Points:
 """
 In operators/layers.py:
 
-from layer_painter.logging import log_operation, get_logger
+from layer_painter.lp_logging import log_operation, get_logger
 
 logger = get_logger("layers")
 
@@ -46,7 +46,7 @@ class LP_OT_CreateLayer(bpy.types.Operator):
 """
 In operators/baking.py:
 
-from layer_painter.logging import LogContext, get_logger
+from layer_painter.lp_logging import LogContext, get_logger
 
 logger = get_logger("baking")
 
@@ -81,7 +81,7 @@ class LP_OT_BakeAllChannels(bpy.types.Operator):
 """
 In operators/paint.py:
 
-from layer_painter.logging import get_logger
+from layer_painter.lp_logging import get_logger
 
 logger = get_logger("paint")
 
@@ -132,7 +132,7 @@ class LP_OT_PaintChannel(bpy.types.Operator):
 """
 In data/utils_nodes.py:
 
-from layer_painter.logging import log_performance, get_logger
+from layer_painter.lp_logging import log_performance, get_logger
 
 logger = get_logger("nodes")
 
@@ -154,7 +154,7 @@ def organize_tree_layout(ntree, start_node, spacing=400):
 """
 In data/materials/layers/layer.py:
 
-from layer_painter.logging import log_cache_operation, log_cache_clear, get_logger
+from layer_painter.lp_logging import log_cache_operation, log_cache_clear, get_logger
 
 logger = get_logger("layer")
 
@@ -191,7 +191,7 @@ def clear_caches():
 """
 In operators/paint.py:
 
-from layer_painter.logging import get_logger, record_metric
+from layer_painter.lp_logging import get_logger, record_metric
 
 logger = get_logger("paint")
 
@@ -240,7 +240,7 @@ def save_painted_texture(image, output_path):
 """
 In operators/utils_operator.py:
 
-from layer_painter.logging import get_logger, get_error_log
+from layer_painter.lp_logging import get_logger, get_error_log
 
 logger = get_logger("operator")
 
@@ -273,7 +273,7 @@ def safe_get_material(mat_uid):
 """
 In ui/viewport/layers/panel_layers.py:
 
-from layer_painter.logging import get_logger, log_ui_event
+from layer_painter.lp_logging import get_logger, log_ui_event
 
 logger = get_logger("ui_layers")
 
@@ -308,7 +308,7 @@ class LP_PT_LayersPanel(bpy.types.Panel):
 """
 In preferences/main.py:
 
-from layer_painter.logging import generate_debug_report, save_debug_report
+from layer_painter.lp_logging import generate_debug_report, save_debug_report
 
 class LP_OT_ExportDebugReport(bpy.types.Operator):
     '''Export Layer Painter debug report'''
@@ -340,7 +340,7 @@ class LP_OT_ExportDebugReport(bpy.types.Operator):
 When adding logging to a module:
 
 1. Import logging at top:
-   from layer_painter.logging import (
+   from layer_painter.lp_logging import (
        get_logger, log_operation, LogContext, 
        log_cache_clear, record_metric
    )
@@ -391,21 +391,21 @@ logger.warning("Warning message")        # Visible at WARNING level
 logger.error("Error occurred")          # Always visible
 
 # Get metrics
-from layer_painter.logging import get_metrics
+from layer_painter.lp_logging import get_metrics
 
 metrics = get_metrics()
 stats = metrics.get_all_stats()
 print(stats)  # {"operation_name": {"count": 5, "avg_time": 0.123, ...}}
 
 # Get error log
-from layer_painter.logging import get_error_log
+from layer_painter.lp_logging import get_error_log
 
 errors = get_error_log()
 recent = errors.get_recent_errors(5)
 summary = errors.get_error_summary()  # {"RuntimeError": 2, "ValueError": 1}
 
 # Generate reports
-from layer_painter.logging import generate_debug_report, save_debug_report
+from layer_painter.lp_logging import generate_debug_report, save_debug_report
 
 report = generate_debug_report()  # Get as string
 save_debug_report("debug_report.txt")  # Save to file

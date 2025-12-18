@@ -226,7 +226,7 @@ manager.export_asset(asset, "export.lpa")
 
 #### Task: Log operation with metrics
 ```python
-from layer_painter.logging import log_operation, get_logger
+from layer_painter.lp_logging import log_operation, get_logger
 
 logger = get_logger(__name__)
 

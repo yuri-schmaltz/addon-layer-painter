@@ -9,7 +9,7 @@ from .operators.assets import load_assets
 
 # Import logging
 try:
-    from .logging import get_logger, LogContext, log_cache_clear
+    from .lp_logging import get_logger, LogContext, log_cache_clear
     logger = get_logger("handlers")
     logging_available = True
 except ImportError:

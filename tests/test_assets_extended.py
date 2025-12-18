@@ -16,8 +16,10 @@ spec.loader.exec_module(assets_extended)
 
 class TestSemanticVersion(unittest.TestCase):
     def test_parse_and_compare(self):
-        v = assets_extended.SematicVersion.parse("1.2.3")
-        # typo in class name? handle via actual class
+        v = assets_extended.SemanticVersion.parse("1.2.3")
+        self.assertEqual(v.major, 1)
+        self.assertEqual(v.minor, 2)
+        self.assertEqual(v.patch, 3)
 
     def test_compatibility(self):
         v = assets_extended.SemanticVersion.parse("1.2.5")
