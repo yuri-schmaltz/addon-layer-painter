@@ -7,9 +7,9 @@ from .....data import utils_nodes
 def setup_channel_nodes(layer, channel, endpoints):
     """creates the nodes for the given channel in the form of a fill layer"""
     if not layer.node:
-        raise f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed."
+        raise RuntimeError(f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed.")
     if not channel.inp:
-        raise f"Couldn't find input for channel '{channel.name}'. Delete channel to proceed."
+        raise RuntimeError(f"Couldn't find input for channel '{channel.name}'. Delete channel to proceed.")
 
     # add channel mix and opacity
     mix = __add_channel_mix(layer, channel, endpoints)
@@ -42,14 +42,14 @@ def remove_channel_nodes(layer, channel_uid):
 def get_channel_mix_node(layer, channel_uid):
     """returns the mix node for the given layer and channel"""
     if not layer.node:
-        raise f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed."
+        raise RuntimeError(f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed.")
     return layer.node.node_tree.nodes[channel_uid]
 
 
 def get_channel_tex_alpha_socket(layer, channel_uid):
     """returns the texture alpha nodes socket for the given channel uid"""
     if not layer.node:
-        raise f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed."
+        raise RuntimeError(f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed.")
     return (
         get_channel_mix_node(layer, channel_uid).inputs[0].links[0].from_node.inputs[0]
     )
@@ -58,7 +58,7 @@ def get_channel_tex_alpha_socket(layer, channel_uid):
 def get_channel_mask_socket(layer, channel_uid):
     """returns the mask nodes socket for the given channel uid"""
     if not layer.node:
-        raise f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed."
+        raise RuntimeError(f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed.")
     return (
         get_channel_tex_alpha_socket(layer, channel_uid)
         .node.inputs[2]
@@ -70,7 +70,7 @@ def get_channel_mask_socket(layer, channel_uid):
 def get_channel_opacity_socket(layer, channel_uid):
     """returns the opacity nodes socket for the given channel uid"""
     if not layer.node:
-        raise f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed."
+        raise RuntimeError(f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed.")
     return (
         get_channel_mask_socket(layer, channel_uid)
         .node.inputs[0]
@@ -82,7 +82,7 @@ def get_channel_opacity_socket(layer, channel_uid):
 def get_channel_value_node(layer, channel_uid):
     """returns the node storing the value for the given channel uid"""
     if not layer.node:
-        raise f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed."
+        raise RuntimeError(f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed.")
     node = get_channel_mix_node(layer, channel_uid).inputs[2].links[0].from_node
     while node.bl_idname == constants.NODES["GROUP"]:
         node = node.inputs[0].links[0].from_node
@@ -92,7 +92,7 @@ def get_channel_value_node(layer, channel_uid):
 def get_channel_filter_socket(layer, channel_uid):
     """returns the filter socket for the given channel uid"""
     if not layer.node:
-        raise f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed."
+        raise RuntimeError(f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed.")
     return (
         get_channel_mix_node(layer, channel_uid).inputs[2].links[0].from_node.inputs[0]
     )
@@ -125,7 +125,7 @@ def get_channel_data_type(layer, channel_uid):
 def cycle_channel_data_type(layer, channel_uid):
     """cycles the type of data this channel is set to in ("COL", "TEX")"""
     if not layer.node:
-        raise f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed."
+        raise RuntimeError(f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed.")
 
     data_type = get_channel_data_type(layer, channel_uid)
     node = get_channel_value_node(layer, channel_uid)
@@ -153,7 +153,7 @@ def cycle_channel_data_type(layer, channel_uid):
 def set_channel_data_type(layer, channel_uid, to_type):
     """sets the channel data type to the given type in ("COL", "TEX")"""
     if not layer.node:
-        raise f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed."
+        raise RuntimeError(f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed.")
 
     data_type = get_channel_data_type(layer, channel_uid)
     if data_type != to_type:

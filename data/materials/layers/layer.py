@@ -36,9 +36,10 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
         global cached_materials
         if self.mat_uid_ref in cached_materials:
             try:
-                if cached_materials[self.mat_uid_ref].name:
-                    return cached_materials[self.mat_uid_ref]
-            except:
+                mat = cached_materials[self.mat_uid_ref]
+                if mat.name:  # Valida que material não foi deletado
+                    return mat
+            except (KeyError, ReferenceError, AttributeError):
                 return self.__material_by_ref
 
         return self.__material_by_ref
@@ -104,7 +105,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def has_channel_input(self, channel_uid):
         """returns if this layer has an input for the given channel uid"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         for out in self.node.node_tree.nodes[constants.INPUT_NAME].outputs:
             if hasattr(out, "uid") and out.uid == channel_uid:
                 return True
@@ -113,7 +114,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def get_channel_input_index(self, channel_uid):
         """returns the index of the channel input with the given uid"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         for i, out in enumerate(
             self.node.node_tree.nodes[constants.INPUT_NAME].outputs
         ):
@@ -124,7 +125,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def get_channel_output_index(self, channel_uid):
         """returns the index of the channel output with the given uid"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         for i, inp in enumerate(
             self.node.node_tree.nodes[constants.OUTPUT_NAME].inputs
         ):
@@ -140,7 +141,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
 
     def get_channel_enabled(self, channel_uid):
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         if channel_uid == "LAYER":
             return True
 
@@ -153,13 +154,13 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def get_layer_opacity_socket(self):
         """returns this layers opacity node socket"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         return self.node.node_tree.nodes[constants.OPAC_NAME].inputs[0]
 
     def get_layer_visibility_node(self):
         """returns this layers visibility node"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         opac_socket = self.get_layer_opacity_socket()
         if (
             not opac_socket.is_linked
@@ -172,7 +173,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def get_mask_input(self, channel):
         """returns the input for the given channel uid or 'LAYER'"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         if channel == "LAYER":
             return self.node.node_tree.nodes[constants.OPAC_NAME].inputs[2]
         else:
@@ -184,7 +185,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def get_filter_input(self, channel):
         """returns the input for the given channel uid or 'LAYER'"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         if channel == "LAYER":
             # return self.node.node_tree.nodes[constants.OPAC_NAME].inputs[2]
             pass
@@ -226,7 +227,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def get_mask_nodes(self, channel):
         """returns a list of nodes which match the masks added to the given channel uid or 'LAYER'"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         # TODO (noted by Joshua) cache these in some form. Called a lot in the mask ui right now. Should be fairly fast but could be optimized
         if channel == "LAYER":
             return self.__get_layer_mask_nodes()
@@ -270,7 +271,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def get_filter_nodes(self, channel):
         """returns a list of nodes which match the filters added to the given channel uid or 'LAYER'"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         if channel == "LAYER":
             return self.__get_layer_filter_nodes()
         else:
@@ -286,14 +287,14 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def update_channel_appearance(self, changed_channel):
         """updates the appearance on the layer node for the given channel"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         self.__update_channel_socket_names(changed_channel)
 
     # node utility
     def texture_setup(self, ntree=None):
         """sets up texture nodes and returns the texture node"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
 
         if ntree == None:
             ntree = self.node.node_tree
@@ -311,11 +312,11 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
         """moves this channels nodes up one spot"""
         below = self.mat.lp.layer_below(self, 2)
         if below and not below.node:
-            raise f"Couldn't find layer node for '{below.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{below.name}'. Delete the layer to proceed.")
 
         above = self.mat.lp.layer_below(self, 1)
         if above and not above.node:
-            raise f"Couldn't find layer node for '{above.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{above.name}'. Delete the layer to proceed.")
 
         if above:
             layer_channels.disconnect_outputs(above)
@@ -336,11 +337,11 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
         """moves this channels nodes down one spot"""
         below = self.mat.lp.layer_above(self, 1)
         if below and not below.node:
-            raise f"Couldn't find layer node for '{below.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{below.name}'. Delete the layer to proceed.")
 
         bottom = self.mat.lp.layer_below(self, 1)
         if bottom and not bottom.node:
-            raise f"Couldn't find layer node for '{bottom.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{bottom.name}'. Delete the layer to proceed.")
 
         layer_channels.disconnect_outputs(below)
         layer_channels.disconnect_outputs(self)
@@ -496,7 +497,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def __move_asset_node(self, ntree, node, move_up):
         """moves the given asset node up or down"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         if move_up:
             self.__move_asset_node_up(ntree, node)
         else:
@@ -506,7 +507,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def add_mask(self, mask_data, has_blend):
         """gets the mask data properties and adds this mask to the top of the stack"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         self.remove_inside_preview()
 
         # add mask node
@@ -529,7 +530,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def remove_mask(self, mask_node):
         """removes the given mask node and its group"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         self.remove_inside_preview()
         self.__remove_asset_node(self.node.node_tree, mask_node)
         self.get_layer_opacity_socket().default_value = (
@@ -541,7 +542,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def move_mask(self, mask_node, move_up):
         """moves the given mask group up or down"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         self.remove_inside_preview()
         self.__move_asset_node(self.node.node_tree, mask_node, move_up)
 
@@ -550,13 +551,13 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def is_group_top_mask(self, mask_group, channel):
         """returns if the given group is the top mask or not"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         return mask_group == self.get_mask_nodes(channel)[0]
 
     def is_group_bottom_mask(self, mask_group, channel):
         """returns if the given group is the top mask or not"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         return mask_group == self.get_mask_nodes(channel)[-1]
 
     def __link_mask_blend_node(self, ntree, mix, group_in, group_out):
@@ -570,7 +571,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def __add_blend_mode_to_mask(self, mask_node):
         """adds a mix node as well as previous mask input to the mask node and node group"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         mask_node.node_tree.interface.new_socket(
             socket_type=constants.SOCKETS["FLOAT_FACTOR"],
             name="Mask In",
@@ -623,7 +624,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def add_filter(self, filter_data):
         """gets the filter data properties and adds this filter to the top of the stack"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
 
         # add filter node
         ntree = self.node.node_tree
@@ -645,7 +646,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def remove_filter(self, filter_node):
         """removes the given filter node and its group"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         if utils.active_material(bpy.context).lp.channel == "LAYER":
             ntree = bpy.data.node_groups[constants.LAYER_FILTER_NAME(self)]
             self.__remove_asset_node(ntree, filter_node)
@@ -658,7 +659,7 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def move_filter(self, filter_node, move_up):
         """moves the given filter group up or down"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         if utils.active_material(bpy.context).lp.channel == "LAYER":
             ntree = bpy.data.node_groups[constants.LAYER_FILTER_NAME(self)]
             self.__move_asset_node(ntree, filter_node, move_up)
@@ -668,11 +669,11 @@ class LP_LayerProperties(bpy.types.PropertyGroup):
     def is_group_top_filter(self, filter_group, channel):
         """returns if the given group is the top filter or not"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         return filter_group == self.get_filter_nodes(channel)[0]
 
     def is_group_bottom_filter(self, filter_group, channel):
         """returns if the given group is the top filter or not"""
         if not self.node:
-            raise f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed."
+            raise RuntimeError(f"Couldn't find layer node for '{self.name}'. Delete the layer to proceed.")
         return filter_group == self.get_filter_nodes(channel)[-1]

@@ -14,9 +14,10 @@ def get_unique_name( collection, basename, separator=".", name_prop="name" ):
 
 
 def redraw():
-    """ redraws all areas to update the ui """
+    """ redraws only Layer Painter UI areas to update the ui """
     for area in bpy.context.screen.areas:
-        area.tag_redraw()
+        if area.type in {'VIEW_3D', 'NODE_EDITOR'}:
+            area.tag_redraw()
 
 
 def make_uid( length=10 ):

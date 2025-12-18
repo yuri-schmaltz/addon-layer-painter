@@ -32,9 +32,10 @@ class LP_ChannelProperties(bpy.types.PropertyGroup):
         global cached_materials
         if self.mat_uid_ref in cached_materials:
             try:
-                if cached_materials[self.mat_uid_ref].name:
-                    return cached_materials[self.mat_uid_ref]
-            except:
+                mat = cached_materials[self.mat_uid_ref]
+                if mat.name:  # Valida que material não foi deletado
+                    return mat
+            except (KeyError, ReferenceError, AttributeError):
                 return self.__material_by_ref
 
         return self.__material_by_ref

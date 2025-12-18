@@ -167,7 +167,19 @@ class LP_OT_BakeChannelsModal(bpy.types.Operator):
             context.scene.render.engine = self.prev_engine
             context.scene.cycles.samples = self.prev_samples
             context.scene.view_settings.view_transform = self.prev_view_transform
+            # end progress bar
+            context.window_manager.progress_end()
             return {'FINISHED'}
+        
+        # update progress based on completed bakes
+        mat = utils.active_material(context)
+        if mat:
+            completed = sum(1 for channel in mat.lp.channels if channel.completed_bake)
+            if completed != self.baked_channels:
+                self.baked_channels = completed
+                context.window_manager.progress_update(self.baked_channels)
+                self.report({'INFO'}, f"Baking... {self.baked_channels}/{self.total_channels} channels")
+        
         return {'PASS_THROUGH'}
 
 
@@ -190,6 +202,10 @@ class LP_OT_BakeChannelsModal(bpy.types.Operator):
 
         macro = get_macro()
 
+        # count total channels to bake for progress tracking
+        self.total_channels = sum(1 for channel in utils.active_material(context).lp.channels if channel.bake)
+        self.baked_channels = 0
+
         # set up all bake channels
         for channel in utils.active_material(context).lp.channels:
             channel.completed_bake = False
@@ -205,6 +221,9 @@ class LP_OT_BakeChannelsModal(bpy.types.Operator):
                 clean.properties.channel = channel.uid
 
         macro.define('LP_OT_bake_finish')
+
+        # initialize progress bar
+        context.window_manager.progress_begin(0, self.total_channels)
 
         global TIMER
         TIMER = bpy.context.window_manager.event_timer_add(1, window=bpy.context.window)

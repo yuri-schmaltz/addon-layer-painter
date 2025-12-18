@@ -11,7 +11,7 @@ def setup(layer):
 def update(layer):
     """update all channels for the given layer"""
     if not layer.node:
-        raise f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed."
+        raise RuntimeError(f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed.")
     __add_new_channels(layer)
     __remove_orphan_channels(layer)
 
@@ -19,7 +19,7 @@ def update(layer):
 def disconnect_outputs(layer):
     """disconnects all the layers channel outputs"""
     if not layer.node:
-        raise f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed."
+        raise RuntimeError(f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed.")
 
     # go through all channels and disconnect
     for channel in layer.mat.lp.channels:
@@ -32,7 +32,7 @@ def disconnect_outputs(layer):
 def connect_channel_outputs(layer):
     """connects all channel outputs to the layer above"""
     if not layer.node:
-        raise f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed."
+        raise RuntimeError(f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed.")
 
     # go through all channels and connect output
     for channel in layer.mat.lp.channels:
@@ -71,7 +71,7 @@ def __create_channel(layer, channel):
 def __add_channel_endpoints(layer, channel):
     """adds the in and output for the given channel in this layer"""
     if not channel.inp:
-        raise f"Couldn't find input for channel '{channel.name}'. Delete channel to proceed."
+        raise RuntimeError(f"Couldn't find input for channel '{channel.name}'. Delete channel to proceed.")
 
     # create node group input for channel
     inp, group_inp = utils_groups.add_input(
@@ -94,11 +94,11 @@ def __add_channel_endpoints(layer, channel):
 def __connect_layer_output(layer, channel, out):
     """try to connect the given layer output to the correct input"""
     if not channel.inp:
-        raise f"Couldn't find input for channel '{channel.name}'. Delete channel to proceed."
+        raise RuntimeError(f"Couldn't find input for channel '{channel.name}'. Delete channel to proceed.")
 
     above = layer.mat.lp.layer_above(layer)
     if above and not above.node:
-        raise f"Couldn't find layer node for '{above.name}'. Delete layer to proceed."
+        raise RuntimeError(f"Couldn't find layer node for '{above.name}'. Delete layer to proceed.")
 
     # connect channel output to channel input
     if not above:
@@ -114,7 +114,7 @@ def __connect_layer_input(layer, channel, inp):
     """try to connect the given layer input to the correct output"""
     below = layer.mat.lp.layer_below(layer)
     if below and not below.node:
-        raise f"Couldn't find layer node for '{below.name}'. Delete layer to proceed."
+        raise RuntimeError(f"Couldn't find layer node for '{below.name}'. Delete layer to proceed.")
 
     # connect channel input to layer below
     if below:

@@ -48,7 +48,7 @@ class LP_MaterialProperties(bpy.types.PropertyGroup):
     def layer_nodes(self):
         nodes = []
         for layer in self.layers:
-            if not layer.node: raise f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed."
+            if not layer.node: raise RuntimeError(f"Couldn't find layer node for '{layer.name}'. Delete layer to proceed.")
             nodes.append(layer.node)
         return nodes
     
