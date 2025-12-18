@@ -122,10 +122,6 @@ class LP_OT_RemoveLayer(bpy.types.Operator):
             layer_name = mat.lp.selected.name
             layout.label(text=f'Delete layer "{layer_name}"?', icon="ERROR")
             layout.label(text="This action cannot be undone.", icon="BLANK1")
-        
-        layout.separator()
-            self.report({'ERROR'}, f"Failed to remove layer: {str(e)}")
-            return {"CANCELLED"}
 
 
 class LP_OT_MoveLayerUp(bpy.types.Operator):
